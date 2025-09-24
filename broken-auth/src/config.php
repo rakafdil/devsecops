@@ -24,8 +24,10 @@ session_start();
 // Helper functions
 function logLoginAttempt($username, $ip, $success) {
     global $pdo;
+    // Convert success to proper boolean value
+    $successValue = $success === true || $success === 1 || $success === '1' ? 1 : 0;
     $stmt = $pdo->prepare("INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$username, $ip, $_SERVER['HTTP_USER_AGENT'] ?? '', $success]);
+    $stmt->execute([$username, $ip, $_SERVER['HTTP_USER_AGENT'] ?? '', $successValue]);
 }
 
 function getUserByUsername($username) {
