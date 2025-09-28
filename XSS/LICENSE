@@ -1,0 +1,45 @@
+MIT License
+
+Copyright (c) 2024 XSS Hands-On Lab
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+EDUCATIONAL USE DISCLAIMER:
+
+This software is designed for educational purposes only. The vulnerable 
+applications contained within this project are intentionally insecure and 
+should NEVER be deployed in a production environment or accessible from the 
+internet.
+
+The authors and contributors are not responsible for any misuse of this 
+software or any damages that may result from its use. Users are expected to 
+use this software responsibly and only for legitimate educational and 
+training purposes.
+
+By using this software, you agree to:
+1. Use it only for educational purposes
+2. Not deploy vulnerable applications in production
+3. Not use the techniques learned for malicious purposes  
+4. Follow responsible disclosure practices
+5. Respect applicable laws and regulations
+
+This project is intended to help security professionals, developers, and 
+students understand XSS vulnerabilities and learn proper prevention techniques.
