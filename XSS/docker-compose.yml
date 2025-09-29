@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # Vulnerable PHP Application
+  vulnerable-app:
+    build:
+      context: ./vulnerable
+      dockerfile: Dockerfile
+    container_name: xss-vulnerable
+    ports:
+      - "8080:80"
+    volumes:
+      - ./vulnerable:/var/www/html
+      - ./database:/var/lib/mysql
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=xsslab
+      - MYSQL_PASSWORD=password123
+      - MYSQL_DATABASE=xss_lab
+    depends_on:
+      - mysql
+    networks:
+      - xss-network
+
+  # Secure PHP Application
+  secure-app:
+    build:
+      context: ./secure
+      dockerfile: Dockerfile
+    container_name: xss-secure
+    ports:
+      - "8081:80"
+    volumes:
+      - ./secure:/var/www/html
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=xsslab
+      - MYSQL_PASSWORD=password123
+      - MYSQL_DATABASE=xss_lab_secure
+    depends_on:
+      - mysql
+    networks:
+      - xss-network
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: xss-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: xss_lab
+      MYSQL_USER: xsslab
+      MYSQL_PASSWORD: password123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - xss-network
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: xss-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    ports:
+      - "8082:80"
+    depends_on:
+      - mysql
+    networks:
+      - xss-network
+
+volumes:
+  mysql_data:
+
+networks:
+  xss-network:
+    driver: bridge

@@ -61,15 +61,65 @@ quick_scan() {
     
     # Test for obvious vulnerabilities
     echo "🍪 Cookie Security Test:"
-    curl -s -I http://localhost:8081 | grep -i "set-cookie"
+    cookie_header=$(curl -s -I http://localhost:8081 | grep -i "set-cookie")
+    echo "$cookie_header"
+    
+    # Check for security flags
+    if echo "$cookie_header" | grep -qi "httponly"; then
+        echo "   ✅ HttpOnly flag present"
+    else
+        echo "   🚨 Missing HttpOnly flag - vulnerable to XSS"
+    fi
+    
+    if echo "$cookie_header" | grep -qi "secure"; then
+        echo "   ✅ Secure flag present" 
+    else
+        echo "   🚨 Missing Secure flag - vulnerable over HTTP"
+    fi
     
     echo ""
-    echo "🔐 Session Exposure Test:"
-    curl -s http://localhost:8081 | grep -i "session.*console.log" | head -1
+    echo "🔐 Session Fixation Test:"
+    # Test session fixation vulnerability
+    fixed_session="ATTACKER_SESSION_123456789"
+    session_response=$(curl -s "http://localhost:8081?sessionid=$fixed_session")
+    
+    if echo "$session_response" | grep -qi "session_id.*cannot be changed\|session.*already active"; then
+        echo "⚠️  Session fixation vulnerability detected (but implementation is flawed)"
+        echo "   The code attempts session fixation but fails due to improper implementation"
+        echo "   This reveals a security flaw in the session handling logic"
+    elif echo "$session_response" | grep -qi "session.*fixed\|session.*set"; then
+        echo "🚨 CRITICAL: Session fixation attack successful!"
+    else
+        session_exposed=$(echo "$session_response" | grep -i "session\|phpsessid" | head -1)
+        if [ -n "$session_exposed" ]; then
+            echo "🚨 Session information exposed in response"
+        else
+            echo "✅ No session fixation vulnerability detected"
+        fi
+    fi
     
     echo ""
-    echo "🚨 SQL Error Test:"
-    curl -s -X POST http://localhost:8081/index.php -d "username=admin'&password=test" | grep -i "error\|exception\|mysql" | head -1
+    echo "🚨 SQL Injection Test:"
+    # Test basic SQL injection payloads
+    sql_payloads=("admin'" "admin\" OR \"1\"=\"1\"--" "admin' UNION SELECT 1,2,3--")
+    sqli_found=false
+    
+    for payload in "${sql_payloads[@]}"; do
+        sql_response=$(curl -s -X POST http://localhost:8081/index.php -d "username=$payload&password=test")
+        
+        # Check for different types of SQL errors or unusual responses
+        if echo "$sql_response" | grep -qi "fatal error\|pdoexception\|mysql\|syntax error\|sql"; then
+            echo "🚨 SQL Injection vulnerability detected with payload: $payload"
+            echo "$sql_response" | grep -i "fatal error\|pdoexception\|mysql\|syntax error" | head -1 | sed 's/<[^>]*>//g'
+            sqli_found=true
+            break
+        fi
+    done
+    
+    if [ "$sqli_found" = false ]; then
+        echo "✅ No SQL injection errors detected - using prepared statements"
+        echo "   (This is actually good security practice!)"
+    fi
     
     echo ""
     echo "🔓 Weak Credentials Test:"
