@@ -17,20 +17,20 @@ echo "<p>This page is for testing SQL injection payloads manually.</p>";
 if ($_POST) {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
-    
+
     echo "<h3>Input Received:</h3>";
     echo "<p><strong>Username:</strong> " . htmlspecialchars($username) . "</p>";
     echo "<p><strong>Password:</strong> " . htmlspecialchars($password) . "</p>";
-    
+
     // Build vulnerable query
     $query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-    
+
     echo "<h3>Query to Execute:</h3>";
     echo "<pre style='background: #f4f4f4; padding: 10px; border-radius: 5px;'>$query</pre>";
-    
+
     try {
         $result = $conn->query($query);
-        
+
         if ($result === false) {
             echo "<div style='color: red; background: #ffe6e6; padding: 10px; border-radius: 5px;'>";
             echo "<h3>❌ SQL Error:</h3>";
@@ -41,11 +41,11 @@ if ($_POST) {
                 echo "<div style='color: green; background: #e6ffe6; padding: 10px; border-radius: 5px;'>";
                 echo "<h3>✅ Query Successful!</h3>";
                 echo "<p>Rows found: " . $result->num_rows . "</p>";
-                
+
                 echo "<table border='1' style='border-collapse: collapse; margin-top: 10px;'>";
                 echo "<tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th></tr>";
-                
-                while($row = $result->fetch_assoc()) {
+
+                while ($row = $result->fetch_assoc()) {
                     echo "<tr>";
                     echo "<td>" . htmlspecialchars($row["id"]) . "</td>";
                     echo "<td>" . htmlspecialchars($row["username"]) . "</td>";

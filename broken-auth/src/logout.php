@@ -5,11 +5,11 @@ include 'config.php';
 if (isset($_SESSION['user_id'])) {
     // Vulnerability: Session data cleared but session ID not destroyed
     $_SESSION = array();
-    
+
     // This should be done but it's missing:
     // session_destroy();
     // session_regenerate_id();
-    
+
     $message = "You have been logged out. But session ID remains the same!";
 } else {
     $message = "You were not logged in.";

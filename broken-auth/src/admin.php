@@ -16,7 +16,7 @@ $isAdmin = $_SESSION['role'] === 'admin'; // Can be manipulated!
 // Handle user management actions
 if ($_POST && isset($_POST['action'])) {
     $action = $_POST['action'];
-    
+
     if ($action === 'promote_user' && isset($_POST['user_id'])) {
         // Vulnerability 2: No authorization check for critical actions
         $user_id = $_POST['user_id'];
@@ -24,7 +24,7 @@ if ($_POST && isset($_POST['action'])) {
         $stmt->execute([$user_id]);
         $message = "User promoted to admin!";
     }
-    
+
     if ($action === 'delete_user' && isset($_POST['user_id'])) {
         // Vulnerability 3: No confirmation for destructive actions
         $user_id = $_POST['user_id'];
@@ -32,7 +32,7 @@ if ($_POST && isset($_POST['action'])) {
         $stmt->execute([$user_id]);
         $message = "User deleted!";
     }
-    
+
     if ($action === 'reset_password' && isset($_POST['user_id'])) {
         // Vulnerability 4: Admin can set any password without validation
         $user_id = $_POST['user_id'];
@@ -82,15 +82,15 @@ $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         
         <?php if (isset($message)): ?>
-            <div class="message"><?php echo htmlspecialchars($message); ?></div>
+                <div class="message"><?php echo htmlspecialchars($message); ?></div>
         <?php endif; ?>
         
         <?php if (!$isAdmin): ?>
-            <div class="access-denied">
-                <h3>⚠️ Access Denied</h3>
-                <p>You don't have admin privileges. But the page still loads...</p>
-                <p><strong>Vulnerability:</strong> Improper access control implementation</p>
-            </div>
+                <div class="access-denied">
+                    <h3>⚠️ Access Denied</h3>
+                    <p>You don't have admin privileges. But the page still loads...</p>
+                    <p><strong>Vulnerability:</strong> Improper access control implementation</p>
+                </div>
         <?php endif; ?>
         
         <!-- This section loads regardless of admin status - VULNERABILITY! -->
@@ -107,35 +107,35 @@ $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Actions</th>
             </tr>
             <?php foreach ($users as $user): ?>
-                <tr>
-                    <td><?php echo $user['id']; ?></td>
-                    <td><?php echo htmlspecialchars($user['username']); ?></td>
-                    <td><?php echo htmlspecialchars($user['email']); ?></td>
-                    <td><code><?php echo htmlspecialchars($user['password']); ?></code></td>
-                    <td><?php echo htmlspecialchars($user['role']); ?></td>
-                    <td><?php echo $user['failed_login_attempts']; ?></td>
-                    <td><?php echo $user['last_login']; ?></td>
-                    <td>
-                        <form method="POST" style="display: inline;">
-                            <input type="hidden" name="action" value="promote_user">
-                            <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                            <button type="submit" class="btn-warning">Promote to Admin</button>
-                        </form>
+                    <tr>
+                        <td><?php echo $user['id']; ?></td>
+                        <td><?php echo htmlspecialchars($user['username']); ?></td>
+                        <td><?php echo htmlspecialchars($user['email']); ?></td>
+                        <td><code><?php echo htmlspecialchars($user['password']); ?></code></td>
+                        <td><?php echo htmlspecialchars($user['role']); ?></td>
+                        <td><?php echo $user['failed_login_attempts']; ?></td>
+                        <td><?php echo $user['last_login']; ?></td>
+                        <td>
+                            <form method="POST" style="display: inline;">
+                                <input type="hidden" name="action" value="promote_user">
+                                <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                <button type="submit" class="btn-warning">Promote to Admin</button>
+                            </form>
                         
-                        <form method="POST" style="display: inline;">
-                            <input type="hidden" name="action" value="reset_password">
-                            <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                            <input type="text" name="new_password" placeholder="New password" style="width: 80px;">
-                            <button type="submit" class="btn-info">Reset Password</button>
-                        </form>
+                            <form method="POST" style="display: inline;">
+                                <input type="hidden" name="action" value="reset_password">
+                                <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                <input type="text" name="new_password" placeholder="New password" style="width: 80px;">
+                                <button type="submit" class="btn-info">Reset Password</button>
+                            </form>
                         
-                        <form method="POST" style="display: inline;">
-                            <input type="hidden" name="action" value="delete_user">
-                            <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                            <button type="submit" class="btn-danger" onclick="return true;">Delete</button>
-                        </form>
-                    </td>
-                </tr>
+                            <form method="POST" style="display: inline;">
+                                <input type="hidden" name="action" value="delete_user">
+                                <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                <button type="submit" class="btn-danger" onclick="return true;">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
             <?php endforeach; ?>
         </table>
         
@@ -151,15 +151,15 @@ $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Last Login</th>
             </tr>
             <?php foreach ($stats as $stat): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($stat['username']); ?></td>
-                    <td><?php echo htmlspecialchars($stat['email']); ?></td>
-                    <td><?php echo $stat['total_login_attempts']; ?></td>
-                    <td><?php echo $stat['successful_logins']; ?></td>
-                    <td><?php echo $stat['failed_logins']; ?></td>
-                    <td><?php echo $stat['failed_login_attempts']; ?></td>
-                    <td><?php echo $stat['last_login']; ?></td>
-                </tr>
+                    <tr>
+                        <td><?php echo htmlspecialchars($stat['username']); ?></td>
+                        <td><?php echo htmlspecialchars($stat['email']); ?></td>
+                        <td><?php echo $stat['total_login_attempts']; ?></td>
+                        <td><?php echo $stat['successful_logins']; ?></td>
+                        <td><?php echo $stat['failed_logins']; ?></td>
+                        <td><?php echo $stat['failed_login_attempts']; ?></td>
+                        <td><?php echo $stat['last_login']; ?></td>
+                    </tr>
             <?php endforeach; ?>
         </table>
         

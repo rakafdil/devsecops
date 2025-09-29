@@ -16,20 +16,20 @@ $currentUser = getUserByUsername($_SESSION['username']);
 // Handle profile updates
 if ($_POST && isset($_POST['action'])) {
     $action = $_POST['action'];
-    
+
     if ($action === 'update_profile') {
         $new_username = $_POST['username'];
         $new_email = $_POST['email'];
-        
+
         // Vulnerability 1: No validation of username uniqueness
         // Vulnerability 2: No email format validation
         try {
             $stmt = $pdo->prepare("UPDATE users SET username = ?, email = ? WHERE id = ?");
             $stmt->execute([$new_username, $new_email, $currentUser['id']]);
-            
+
             // Vulnerability 3: Session not updated after username change
             // $_SESSION['username'] should be updated but it's not!
-            
+
             $success = "Profile updated successfully!";
             // Refresh user data
             $currentUser = getUserByUsername($_SESSION['username']); // Still uses old username!
@@ -37,22 +37,22 @@ if ($_POST && isset($_POST['action'])) {
             $error = "Update failed: " . $e->getMessage();
         }
     }
-    
+
     if ($action === 'change_password') {
         $old_password = $_POST['old_password'];
         $new_password = $_POST['new_password'];
         $confirm_password = $_POST['confirm_password'];
-        
+
         // Vulnerability 4: No verification of old password
         // if ($currentUser['password'] !== $old_password) {
         //     $error = "Old password incorrect";
         // }
-        
+
         // Vulnerability 5: No password confirmation check
         // if ($new_password !== $confirm_password) {
         //     $error = "New passwords don't match";
         // }
-        
+
         if (!$error) {
             // Vulnerability 6: Plain text password storage
             $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
@@ -60,18 +60,18 @@ if ($_POST && isset($_POST['action'])) {
             $success = "Password changed successfully! New password: $new_password";
         }
     }
-    
+
     if ($action === 'escalate_privileges') {
         // Vulnerability 7: Client-side privilege escalation
         $new_role = $_POST['role'];
-        
+
         // This should never be allowed, but here it is!
         $stmt = $pdo->prepare("UPDATE users SET role = ? WHERE id = ?");
         $stmt->execute([$new_role, $currentUser['id']]);
-        
+
         // Update session
         $_SESSION['role'] = $new_role;
-        
+
         $success = "Role updated to: $new_role";
     }
 }
@@ -83,7 +83,7 @@ if (isset($_GET['user_id'])) {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$user_id]);
     $viewUser = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($viewUser) {
         $currentUser = $viewUser; // Show other user's profile!
     }
@@ -116,11 +116,11 @@ if (isset($_GET['user_id'])) {
         <h1>👤 User Profile</h1>
         
         <?php if ($error): ?>
-            <div class="error">Error: <?php echo htmlspecialchars($error); ?></div>
+                <div class="error">Error: <?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
         
         <?php if ($success): ?>
-            <div class="success"><?php echo htmlspecialchars($success); ?></div>
+                <div class="success"><?php echo htmlspecialchars($success); ?></div>
         <?php endif; ?>
         
         <!-- Current User Information -->

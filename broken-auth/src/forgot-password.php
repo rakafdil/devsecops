@@ -9,16 +9,16 @@ $step = $_GET['step'] ?? 1;
 if ($_POST && $step == 1) {
     $username = $_POST['username'];
     $user = getUserByUsername($username);
-    
+
     if ($user) {
         // Vulnerability 1: Predictable reset tokens (6-digit numbers)
         $token = sprintf("%06d", rand(1, 999999)); // Very predictable!
         $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour
-        
+
         // Store token
         $stmt = $pdo->prepare("INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?, ?, ?)");
         $stmt->execute([$user['id'], $token, $expires]);
-        
+
         // Vulnerability 2: Token disclosed in response
         $success = "Password reset token generated: <strong>$token</strong><br>";
         $success .= "Token expires at: $expires<br>";
@@ -33,21 +33,21 @@ if ($_POST && $step == 1) {
 if ($_POST && $step == 2) {
     $token = $_POST['token'];
     $new_password = $_POST['new_password'];
-    
+
     // Find token
     $stmt = $pdo->prepare("SELECT * FROM password_reset_tokens WHERE token = ? AND used = 0 AND expires_at > NOW()");
     $stmt->execute([$token]);
     $reset_token = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($reset_token) {
         // Vulnerability 4: No password strength validation during reset
         $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
         $stmt->execute([$new_password, $reset_token['user_id']]); // Plain text again!
-        
+
         // Mark token as used
         $stmt = $pdo->prepare("UPDATE password_reset_tokens SET used = 1 WHERE id = ?");
         $stmt->execute([$reset_token['id']]);
-        
+
         $success = "Password reset successful! New password: <strong>$new_password</strong>";
     } else {
         $error = "Invalid or expired token";
@@ -79,51 +79,51 @@ if ($_POST && $step == 2) {
         <h1>🔓 Password Reset</h1>
         
         <?php if ($error): ?>
-            <div class="error">Error: <?php echo $error; ?></div>
+                <div class="error">Error: <?php echo $error; ?></div>
         <?php endif; ?>
         
         <?php if ($success): ?>
-            <div class="success"><?php echo $success; ?></div>
+                <div class="success"><?php echo $success; ?></div>
         <?php endif; ?>
         
         <?php if ($step == 1): ?>
-            <!-- Step 1: Request Reset Token -->
-            <h2>Step 1: Request Password Reset</h2>
-            <form method="POST" action="">
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <button type="submit">Generate Reset Token</button>
-            </form>
+                <!-- Step 1: Request Reset Token -->
+                <h2>Step 1: Request Password Reset</h2>
+                <form method="POST" action="">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <button type="submit">Generate Reset Token</button>
+                </form>
             
-            <div class="token-demo">
-                <h3>🔍 Demo: Common Tokens Generated</h3>
-                <p>This system generates predictable 6-digit tokens:</p>
-                <ul>
-                    <li>123456</li>
-                    <li>654321</li>
-                    <li>111111</li>
-                    <li>000001</li>
-                    <li>999999</li>
-                </ul>
-                <p><strong>Try brute forcing these common tokens!</strong></p>
-            </div>
+                <div class="token-demo">
+                    <h3>🔍 Demo: Common Tokens Generated</h3>
+                    <p>This system generates predictable 6-digit tokens:</p>
+                    <ul>
+                        <li>123456</li>
+                        <li>654321</li>
+                        <li>111111</li>
+                        <li>000001</li>
+                        <li>999999</li>
+                    </ul>
+                    <p><strong>Try brute forcing these common tokens!</strong></p>
+                </div>
             
         <?php elseif ($step == 2): ?>
-            <!-- Step 2: Reset Password -->
-            <h2>Step 2: Reset Password</h2>
-            <form method="POST" action="?step=2">
-                <div class="form-group">
-                    <label for="token">Reset Token:</label>
-                    <input type="text" id="token" name="token" value="<?php echo htmlspecialchars($_GET['token'] ?? ''); ?>" required>
-                </div>
-                <div class="form-group">
-                    <label for="new_password">New Password:</label>
-                    <input type="password" id="new_password" name="new_password" required>
-                </div>
-                <button type="submit">Reset Password</button>
-            </form>
+                <!-- Step 2: Reset Password -->
+                <h2>Step 2: Reset Password</h2>
+                <form method="POST" action="?step=2">
+                    <div class="form-group">
+                        <label for="token">Reset Token:</label>
+                        <input type="text" id="token" name="token" value="<?php echo htmlspecialchars($_GET['token'] ?? ''); ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">New Password:</label>
+                        <input type="password" id="new_password" name="new_password" required>
+                    </div>
+                    <button type="submit">Reset Password</button>
+                </form>
         <?php endif; ?>
         
         <div class="vulnerability">

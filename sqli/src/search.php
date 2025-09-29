@@ -4,21 +4,21 @@ include 'config.php';
 // Simple search function - ALSO VULNERABLE!
 if (isset($_GET['search'])) {
     $search = $_GET['search'];
-    
+
     // VULNERABLE: Direct concatenation without sanitization
     $query = "SELECT id, username, email, role FROM users WHERE username LIKE '%$search%' OR email LIKE '%$search%'";
-    
+
     echo "<h3>Search Results for: " . htmlspecialchars($search) . "</h3>";
     echo "<p><strong>Query executed:</strong> <code>$query</code></p>";
-    
+
     $result = $conn->query($query);
-    
+
     if ($result) {
         if ($result->num_rows > 0) {
             echo "<table border='1' style='border-collapse: collapse; width: 100%;'>";
             echo "<tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th></tr>";
-            
-            while($row = $result->fetch_assoc()) {
+
+            while ($row = $result->fetch_assoc()) {
                 echo "<tr>";
                 echo "<td>" . $row["id"] . "</td>";
                 echo "<td>" . $row["username"] . "</td>";

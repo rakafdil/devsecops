@@ -104,31 +104,31 @@
 
         <?php
         include 'config.php';
-        
+
         if ($_POST) {
             $username = $_POST['username'];
             $password = $_POST['password'];
-            
+
             // VULNERABLE SQL QUERY - NO SANITIZATION!
             // This is intentionally vulnerable to demonstrate SQL injection
             $query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-            
+
             echo "<div class='info'>";
             echo "<strong>Executed Query:</strong>";
             echo "<div class='code'>$query</div>";
             echo "</div>";
-            
+
             // Execute query with proper error handling
             $result = $conn->query($query);
-            
+
             if ($result) {
                 if ($result->num_rows > 0) {
                     echo "<div class='result success'>";
                     echo "<h3>✅ Login Successful!</h3>";
                     echo "<p>Welcome! You have successfully logged in.</p>";
-                    
+
                     echo "<h4>User Data Retrieved:</h4>";
-                    while($row = $result->fetch_assoc()) {
+                    while ($row = $result->fetch_assoc()) {
                         echo "<p><strong>ID:</strong> " . $row["id"] . "</p>";
                         echo "<p><strong>Username:</strong> " . $row["username"] . "</p>";
                         echo "<p><strong>Email:</strong> " . $row["email"] . "</p>";

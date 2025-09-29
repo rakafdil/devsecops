@@ -15,36 +15,44 @@ if ($_POST && isset($_POST['username']) && isset($_POST['password'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
     $ip = getClientIP();
-    
+
     // Vulnerability 2: No rate limiting, allows brute force
     $user = getUserByUsername($username);
-    
-    if ($user) {
-        // Vulnerability 3: Plain text password comparison
-        if ($user['password'] === $password) {
-            // Successful login
-            logLoginAttempt($username, $ip, true);
-            updateLoginAttempts($username, false);
-            
-            // Vulnerability 4: Predictable session management
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
-            $_SESSION['login_time'] = time();
-            
-            // Vulnerability 5: Session not regenerated after login
-            // session_regenerate_id(); // This should be here but it's missing!
-            
-            $success = "Login successful! Welcome " . htmlspecialchars($user['username']);
+
+    if (isRedisRateLimited($ip, 5, 300)) {
+        $error = "Too many login attempts. Please try again in 5 minutes.";
+
+        // Log the rate-limited attempt
+        logLoginAttempt($username, $ip, false);
+    } else {
+        if ($user) {
+
+            // Vulnerability 3: Plain text password comparison
+            if ($user['password'] === $password) {
+                // Successful login
+                logLoginAttempt($username, $ip, true);
+                updateLoginAttempts($username, false);
+
+                // Vulnerability 4: Predictable session management
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['login_time'] = time();
+
+                // Vulnerability 5: Session not regenerated after login
+                // session_regenerate_id(); // This should be here but it's missing!
+
+                $success = "Login successful! Welcome " . htmlspecialchars($user['username']);
+            } else {
+                // Failed login
+                logLoginAttempt($username, $ip, false);
+                updateLoginAttempts($username, true);
+                $error = "Invalid credentials";
+            }
         } else {
-            // Failed login
             logLoginAttempt($username, $ip, false);
-            updateLoginAttempts($username, true);
             $error = "Invalid credentials";
         }
-    } else {
-        logLoginAttempt($username, $ip, false);
-        $error = "Invalid credentials";
     }
 }
 
@@ -195,72 +203,72 @@ if ($isLoggedIn) {
         </div>
 
         <?php if ($error): ?>
-            <div class="error">
-                <strong>Error:</strong> <?php echo htmlspecialchars($error); ?>
-            </div>
+                <div class="error">
+                    <strong>Error:</strong> <?php echo htmlspecialchars($error); ?>
+                </div>
         <?php endif; ?>
 
         <?php if ($success): ?>
-            <div class="success">
-                <strong>Success:</strong> <?php echo $success; ?>
-            </div>
+                <div class="success">
+                    <strong>Success:</strong> <?php echo $success; ?>
+                </div>
         <?php endif; ?>
 
         <?php if (!$isLoggedIn): ?>
-            <!-- Login Form -->
-            <h2>Login</h2>
-            <form method="POST" action="">
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
+                <!-- Login Form -->
+                <h2>Login</h2>
+                <form method="POST" action="">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
                 
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
                 
-                <button type="submit">Login</button>
-            </form>
+                    <button type="submit">Login</button>
+                </form>
 
-            <!-- Common Credentials for Testing -->
-            <div style="margin-top: 30px;">
-                <h3>🔍 Test Credentials (Weak Passwords!):</h3>
-                <table>
-                    <tr><th>Username</th><th>Password</th><th>Role</th></tr>
-                    <tr><td>admin</td><td>admin</td><td>Admin</td></tr>
-                    <tr><td>john</td><td>password</td><td>User</td></tr>
-                    <tr><td>jane</td><td>123456</td><td>User</td></tr>
-                    <tr><td>bob</td><td>qwerty</td><td>User</td></tr>
-                    <tr><td>charlie</td><td>password123</td><td>Moderator</td></tr>
-                </table>
-            </div>
+                <!-- Common Credentials for Testing -->
+                <div style="margin-top: 30px;">
+                    <h3>🔍 Test Credentials (Weak Passwords!):</h3>
+                    <table>
+                        <tr><th>Username</th><th>Password</th><th>Role</th></tr>
+                        <tr><td>admin</td><td>admin</td><td>Admin</td></tr>
+                        <tr><td>john</td><td>password</td><td>User</td></tr>
+                        <tr><td>jane</td><td>123456</td><td>User</td></tr>
+                        <tr><td>bob</td><td>qwerty</td><td>User</td></tr>
+                        <tr><td>charlie</td><td>password123</td><td>Moderator</td></tr>
+                    </table>
+                </div>
         <?php else: ?>
-            <!-- User Dashboard -->
-            <div class="success">
-                <h2>✅ Logged in as: <?php echo htmlspecialchars($currentUser['username']); ?></h2>
-            </div>
+                <!-- User Dashboard -->
+                <div class="success">
+                    <h2>✅ Logged in as: <?php echo htmlspecialchars($currentUser['username']); ?></h2>
+                </div>
 
-            <div class="user-info">
-                <h3>User Information:</h3>
-                <p><strong>ID:</strong> <?php echo $currentUser['id']; ?></p>
-                <p><strong>Username:</strong> <?php echo htmlspecialchars($currentUser['username']); ?></p>
-                <p><strong>Email:</strong> <?php echo htmlspecialchars($currentUser['email']); ?></p>
-                <p><strong>Role:</strong> <?php echo htmlspecialchars($currentUser['role']); ?></p>
-                <p><strong>Last Login:</strong> <?php echo $currentUser['last_login']; ?></p>
-                <p><strong>Failed Attempts:</strong> <?php echo $currentUser['failed_login_attempts']; ?></p>
-            </div>
+                <div class="user-info">
+                    <h3>User Information:</h3>
+                    <p><strong>ID:</strong> <?php echo $currentUser['id']; ?></p>
+                    <p><strong>Username:</strong> <?php echo htmlspecialchars($currentUser['username']); ?></p>
+                    <p><strong>Email:</strong> <?php echo htmlspecialchars($currentUser['email']); ?></p>
+                    <p><strong>Role:</strong> <?php echo htmlspecialchars($currentUser['role']); ?></p>
+                    <p><strong>Last Login:</strong> <?php echo $currentUser['last_login']; ?></p>
+                    <p><strong>Failed Attempts:</strong> <?php echo $currentUser['failed_login_attempts']; ?></p>
+                </div>
 
-            <div class="session-info">
-                <h3>🔍 Session Information (Exposed for Educational Purposes):</h3>
-                <p><strong>Session ID:</strong> <code><?php echo session_id(); ?></code></p>
-                <p><strong>Session Data:</strong></p>
-                <pre><?php print_r($_SESSION); ?></pre>
-            </div>
+                <div class="session-info">
+                    <h3>🔍 Session Information (Exposed for Educational Purposes):</h3>
+                    <p><strong>Session ID:</strong> <code><?php echo session_id(); ?></code></p>
+                    <p><strong>Session Data:</strong></p>
+                    <pre><?php print_r($_SESSION); ?></pre>
+                </div>
 
-            <a href="logout.php"><button class="logout-btn">Logout</button></a>
-            <a href="profile.php"><button>View Profile</button></a>
-            <a href="admin.php"><button>Admin Panel</button></a>
+                <a href="logout.php"><button class="logout-btn">Logout</button></a>
+                <a href="profile.php"><button>View Profile</button></a>
+                <a href="admin.php"><button>Admin Panel</button></a>
         <?php endif; ?>
 
         <!-- Vulnerability Demonstrations -->

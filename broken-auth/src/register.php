@@ -10,26 +10,26 @@ if ($_POST && isset($_POST['username']) && isset($_POST['password'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
-    
+
     // Vulnerability 1: Weak password validation
     if (isWeakPassword($password)) {
         $error = "Password too weak! (But we allow it anyway)";
     }
-    
+
     // Vulnerability 2: No password confirmation check
     // if ($password !== $confirm_password) {
     //     $error = "Passwords don't match";
     // }
-    
+
     // Vulnerability 3: No email validation
     // No checking if email is valid format
-    
+
     if (!$error) {
         try {
             // Vulnerability 4: Plain text password storage
             $stmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
             $stmt->execute([$username, $email, $password]); // No hashing!
-            
+
             $success = "Registration successful! Your password is stored in plain text.";
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) { // Duplicate entry
@@ -65,11 +65,11 @@ if ($_POST && isset($_POST['username']) && isset($_POST['password'])) {
         <h1>🔓 User Registration</h1>
         
         <?php if ($error): ?>
-            <div class="error">Error: <?php echo htmlspecialchars($error); ?></div>
+                <div class="error">Error: <?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
         
         <?php if ($success): ?>
-            <div class="success"><?php echo htmlspecialchars($success); ?></div>
+                <div class="success"><?php echo htmlspecialchars($success); ?></div>
         <?php endif; ?>
         
         <form method="POST" action="">
