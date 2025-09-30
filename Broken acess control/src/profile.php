@@ -2,9 +2,14 @@
 require_once 'config.php';
 requireLogin();
 
-// VULNERABILITY: Insecure Direct Object Reference (IDOR)
-// The application doesn't verify if the user should have access to the requested profile
+// FIXED: Proper authorization check for profile access
 $user_id = $_GET['user_id'] ?? $_SESSION['user_id'];
+
+// Check if current user can access this profile
+if ($user_id != $_SESSION['user_id'] && !isAdmin()) {
+    header('HTTP/1.1 403 Forbidden');
+    die("<div class='alert alert-danger'>Access denied. You can only view your own profile unless you are an admin.</div>");
+}
 
 $pdo = getConnection();
 $stmt = $pdo->prepare("SELECT u.*, p.* FROM users u LEFT JOIN profiles p ON u.id = p.user_id WHERE u.id = ?");
