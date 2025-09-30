@@ -2,22 +2,33 @@
 require_once 'config.php';
 requireLogin();
 
-// VULNERABILITY: Insecure Direct Object Reference for documents
+// FIXED: Proper authorization check for document access
 $doc_id = $_GET['doc_id'] ?? null;
 $pdo = getConnection();
 
 if ($doc_id) {
-    // VULNERABILITY: No authorization check to see if user can access this document
+    // Get document first to check permissions
     $stmt = $pdo->prepare("SELECT d.*, u.username as owner_name FROM documents d LEFT JOIN users u ON d.owner_id = u.id WHERE d.id = ?");
     $stmt->execute([$doc_id]);
     $document = $stmt->fetch();
     
     if (!$document) {
         $error = "Document not found.";
+    } elseif ($document['is_private'] && $document['owner_id'] != $_SESSION['user_id'] && !isAdmin()) {
+        // Check if user can access this private document
+        header('HTTP/1.1 403 Forbidden');
+        die("<div class='alert alert-danger'>Access denied. You don't have permission to view this private document.</div>");
     }
 } else {
-    // Get all documents (both public and private)
-    $stmt = $pdo->query("SELECT d.*, u.username as owner_name FROM documents d LEFT JOIN users u ON d.owner_id = u.id ORDER BY d.created_at DESC");
+    // Get documents that user is allowed to see
+    if (isAdmin()) {
+        // Admin can see all documents
+        $stmt = $pdo->query("SELECT d.*, u.username as owner_name FROM documents d LEFT JOIN users u ON d.owner_id = u.id ORDER BY d.created_at DESC");
+    } else {
+        // Regular users can only see public documents and their own private documents
+        $stmt = $pdo->prepare("SELECT d.*, u.username as owner_name FROM documents d LEFT JOIN users u ON d.owner_id = u.id WHERE d.is_private = 0 OR d.owner_id = ? ORDER BY d.created_at DESC");
+        $stmt->execute([$_SESSION['user_id']]);
+    }
     $documents = $stmt->fetchAll();
 }
 

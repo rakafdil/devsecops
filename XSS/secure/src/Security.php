@@ -112,8 +112,10 @@ class Security {
                 return self::sanitizeUrl($input);
             case 'string':
             default:
-                // Remove null bytes and control characters
-                return filter_var($input, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+                // Remove null bytes and control characters (PHP 8.1+ compatible)
+                $input = str_replace("\0", '', $input);
+                $input = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $input);
+                return $input;
         }
     }
     

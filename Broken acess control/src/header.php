@@ -150,6 +150,7 @@
                 <a href="register.php">Register</a>
             <?php endif; ?>
             <a href="vulnerabilities.php">Vulnerability Guide</a>
+            <a href="secure_examples.php">🛡️ Secure Examples</a>
         </nav>
 
         <div class="content">

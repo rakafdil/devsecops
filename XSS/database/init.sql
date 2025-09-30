@@ -2,6 +2,11 @@
 CREATE DATABASE IF NOT EXISTS xss_lab;
 CREATE DATABASE IF NOT EXISTS xss_lab_secure;
 
+-- Grant permissions to xsslab user for both databases
+GRANT ALL PRIVILEGES ON xss_lab.* TO 'xsslab'@'%';
+GRANT ALL PRIVILEGES ON xss_lab_secure.* TO 'xsslab'@'%';
+FLUSH PRIVILEGES;
+
 -- Use xss_lab database
 USE xss_lab;
 
