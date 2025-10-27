@@ -286,7 +286,7 @@ semgrep --config=auto src/ --exclude="*.min.php" --exclude="vendor/"
 
 ---
 
-## 🔄 Integrasi CI/CD
+## 🔄 Integrasi CI/CD (tidak perlu dikerjakan)
 
 ### GitHub Actions
 Buat file `.github/workflows/semgrep.yml`:
