@@ -6,8 +6,8 @@ define('DB_USER', $_ENV['DB_USER'] ?? 'root');
 define('DB_PASS', $_ENV['DB_PASS'] ?? 'password123');
 
 // Application configuration
-define('BASE_URL', 'http://localhost:8080');
-define('APP_NAME', 'Vulnerable App - Broken Access Control Demo');
+define('BASE_URL', 'http://localhost:8081');
+define('APP_NAME', '🛡️ Secure App - Fixed Access Control Demo');
 
 // Session configuration
 session_start();

@@ -2,9 +2,14 @@
 require_once 'config.php';
 requireLogin();
 
-// VULNERABILITY: Insecure Direct Object Reference (IDOR)
-// The application doesn't verify if the user should have access to the requested profile
+// FIXED: Proper authorization check for profile access
 $user_id = $_GET['user_id'] ?? $_SESSION['user_id'];
+
+// Check if current user can access this profile
+if ($user_id != $_SESSION['user_id'] && !isAdmin()) {
+    header('HTTP/1.1 403 Forbidden');
+    die("<div class='alert alert-danger'>Access denied. You can only view your own profile unless you are an admin.</div>");
+}
 
 $pdo = getConnection();
 $stmt = $pdo->prepare("SELECT u.*, p.* FROM users u LEFT JOIN profiles p ON u.id = p.user_id WHERE u.id = ?");
@@ -108,11 +113,14 @@ include 'header.php';
             <li>Sensitive information like salary data is exposed to unauthorized users</li>
         </ul>
         
-        <h4>Try these URLs:</h4>
-        <div class="code-example">
-            <a href="profile.php?user_id=1">profile.php?user_id=1</a> (Admin)<br>
-            <a href="profile.php?user_id=83">profile.php?user_id=83</a> (John Doe)<br>
-            <a href="profile.php?user_id=84">profile.php?user_id=84</a> (Jane Smith)
+        <h4>🛡️ Security Notice (Secure Version):</h4>
+        <div class="code-example" style="background-color: #d4edda; border-left: 4px solid #28a745;">
+            ✅ IDOR vulnerability has been fixed!<br>
+            ❌ profile.php?user_id=1 (Admin - Access Denied)<br>
+            ❌ profile.php?user_id=22 (John Doe - Access Denied if not own profile)<br>
+            ❌ profile.php?user_id=23 (Jane Smith - Access Denied if not own profile)<br><br>
+            
+            Compare with vulnerable version at port 8080 to see the difference.
         </div>
     </div>
 
