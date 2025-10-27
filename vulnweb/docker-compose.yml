@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build: .
@@ -11,15 +9,17 @@ services:
       - db
     environment:
       - DB_HOST=db
-      - DB_NAME=vulnerable_app
-      - DB_USER=root
-      - DB_PASS=password123
+      - DB_USER=vulnuser
+      - DB_PASS=vulnpass123
+      - DB_NAME=vulnwebdb
 
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: password123
-      MYSQL_DATABASE: vulnerable_app
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: vulnwebdb
+      MYSQL_USER: vulnuser
+      MYSQL_PASSWORD: vulnpass123
     ports:
       - "3306:3306"
     volumes:

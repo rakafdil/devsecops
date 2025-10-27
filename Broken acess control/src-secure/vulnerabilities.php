@@ -18,18 +18,20 @@ include 'header.php';
         An attacker can bypass authorization and access resources belonging to other users by modifying 
         the parameter values.</p>
         
-        <h4>Try these URLs:</h4>
+        <h4>Examples in this app:</h4>
         <div class="code-example">
-            <strong>Vulnerable Version (Port 8080):</strong><br>
-            <a href="profile.php?user_id=1">profile.php?user_id=1</a> (Admin)<br>
-            <a href="profile.php?user_id=83">profile.php?user_id=83</a> (John Doe)<br>
-            <a href="profile.php?user_id=84">profile.php?user_id=84</a> (Jane Smith)<br><br>
+            <strong>Profile Access:</strong><br>
+            • <code>profile.php?user_id=1</code> - Access admin profile<br>
+            • <code>profile.php?user_id=2</code> - Access John's profile<br>
+            • Change the user_id to access any user's sensitive data<br><br>
             
-            <strong>Secure Version (Port 8081):</strong><br>
-            profile.php?user_id=1 (Admin - Will be blocked)<br>
-            profile.php?user_id=22 (John Doe - Will be blocked)<br>
-            profile.php?user_id=23 (Jane Smith - Will be blocked)
-        </div>        <h4>Impact:</h4>
+            <strong>Document Access:</strong><br>
+            • <code>documents.php?doc_id=2</code> - Access private HR documents<br>
+            • <code>documents.php?doc_id=3</code> - Access admin security guidelines<br>
+            • Sequential IDs make it easy to enumerate all documents
+        </div>
+        
+        <h4>Impact:</h4>
         <ul>
             <li>Unauthorized access to personal information</li>
             <li>Exposure of sensitive financial data (salaries)</li>

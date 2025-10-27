@@ -2,14 +2,14 @@
 require_once 'config.php';
 requireLogin();
 
-// VULNERABILITY: Missing Function Level Access Control
-// This page doesn't properly check if the user has admin privileges
+// FIXED: Proper Function Level Access Control
+// This page now properly checks if the user has admin privileges
 $current_user = getCurrentUser();
 
-// Weak check - can be bypassed by manipulating session or URL parameters
+// Secure check - properly denies access to non-admin users
 if (!isAdmin()) {
-    // VULNERABILITY: This warning can be ignored or bypassed
-    echo "<div class='alert alert-warning'>⚠️ You don't have admin privileges, but the page loads anyway!</div>";
+    header('HTTP/1.1 403 Forbidden');
+    die("<div class='alert alert-danger'>Access denied. Admin privileges required to access this page.</div>");
 }
 
 $message = '';

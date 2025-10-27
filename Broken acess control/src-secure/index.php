@@ -44,10 +44,8 @@ include 'header.php';
         <p>1. Try changing user IDs in URLs:</p>
         <ul>
             <li><code>profile.php?user_id=1</code> (Admin profile)</li>
-            <li><code>profile.php?user_id=83</code> (John Doe's profile - Vulnerable)</li>
-            <li><code>profile.php?user_id=84</code> (Jane Smith's profile - Vulnerable)</li>
-            <li><code>profile.php?user_id=22</code> (John Doe's profile - Secure)</li>
-            <li><code>profile.php?user_id=23</code> (Jane Smith's profile - Secure)</li>
+            <li><code>profile.php?user_id=22</code> (John Doe's profile)</li>
+            <li><code>profile.php?user_id=23</code> (Jane Smith's profile)</li>
         </ul>
         
         <p>2. Try accessing admin functions:</p>
